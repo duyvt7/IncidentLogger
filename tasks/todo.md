@@ -88,15 +88,15 @@
 ## Giai đoạn 2: Reusable UI Components & Dialogs
 
 ### Task 6: Xây dựng UI Theme và Reusable UI Components
-- [ ] Tạo `ui/styles.py` cấu hình ttk.Style đồng bộ (Theme clam, Treeview styling, Notebook tab styling, combobox styling).
-- [ ] Tạo `ui/components/stat_card.py`: Widget hiển thị thẻ KPI/thống kê (Title, Value, Accent Color, Icon).
-- [ ] Tạo `ui/components/date_time_picker.py`: Widget chọn kết hợp DateEntry + Giờ + Phút có validation và method `get_datetime()`, `set_datetime()`.
-- [ ] Tạo `ui/components/data_table.py`: Bảng Treeview bọc sẵn thanh cuộn dọc/ngang, cấu hình cột tự động, bắt sự kiện click/double-click.
+- [x] Tạo `ui/styles.py` cấu hình ttk.Style đồng bộ (Theme clam, Treeview styling, Notebook tab styling, combobox styling).
+- [x] Tạo `ui/components/stat_card.py`: Widget hiển thị thẻ KPI/thống kê (Title, Value, Accent Color, Icon).
+- [x] Tạo `ui/components/date_time_picker.py`: Widget chọn kết hợp DateEntry + Giờ + Phút có validation và method `get_datetime()`, `set_datetime()`.
+- [x] Tạo `ui/components/data_table.py`: Bảng Treeview bọc sẵn thanh cuộn dọc/ngang, cấu hình cột tự động, bắt sự kiện click/double-click.
 - **Acceptance criteria:**
-  - [ ] Các component kế thừa `tk.Frame` hoặc `ttk.Frame`, dễ dàng tái sử dụng ở bất kỳ view nào.
-  - [ ] Cung cấp API rõ ràng (`get_value()`, `set_value()`, `bind_event()`).
+  - [x] Các component kế thừa `tk.Frame` hoặc `ttk.Frame`, dễ dàng tái sử dụng ở bất kỳ view nào.
+  - [x] Cung cấp API rõ ràng (`get_value()`, `set_value()`, `bind_event()`).
 - **Verification:**
-  - [ ] Kiểm tra tạo component trong script test GUI mà không phát sinh lỗi.
+  - [x] Kiểm tra tạo component trong script test GUI mà không phát sinh lỗi.
 - **Dependencies:** Task 1
 - **Files touched:** `ui/__init__.py`, `ui/styles.py`, `ui/components/__init__.py`, `ui/components/stat_card.py`, `ui/components/date_time_picker.py`, `ui/components/data_table.py`
 - **Scope:** Medium (5 files)
@@ -104,16 +104,16 @@
 ---
 
 ### Task 7: Tái cấu trúc IncidentDialog sử dụng Reusable Components
-- [ ] Tạo `ui/dialogs/incident_dialog.py` kế thừa `tk.Toplevel`.
-- [ ] Sử dụng `DateTimePicker` cho trường chọn thời gian.
-- [ ] Xây dựng form nhập liệu với các input rõ ràng, xử lý combobox category -> sub_category đồng bộ tự động.
-- [ ] Tự động gán người báo cáo (`reporter`) mặc định từ session hiện tại.
-- [ ] Validate dữ liệu đầu vào (báo lỗi nếu thiếu Failure hoặc thời gian không hợp lệ) trước khi gọi `incident_service`.
+- [x] Tạo `ui/dialogs/incident_dialog.py` kế thừa `tk.Toplevel`.
+- [x] Sử dụng `DateTimePicker` cho trường chọn thời gian.
+- [x] Xây dựng form nhập liệu với các input rõ ràng, xử lý combobox category -> sub_category đồng bộ tự động.
+- [x] Tự động gán người báo cáo (`reporter`) mặc định từ session hiện tại.
+- [x] Validate dữ liệu đầu vào (báo lỗi nếu thiếu Failure hoặc thời gian không hợp lệ) trước khi gọi `incident_service`.
 - **Acceptance criteria:**
-  - [ ] Hộp thoại hỗ trợ cả 2 chế độ: Thêm mới (`edit_id=None`) và Cập nhật (`edit_id=<id>`).
-  - [ ] Hiển thị thông báo thân thiện và tự động đóng dialog + kích hoạt callback reload sau khi lưu thành công.
+  - [x] Hộp thoại hỗ trợ cả 2 chế độ: Thêm mới (`edit_id=None`) và Cập nhật (`edit_id=<id>`).
+  - [x] Hiển thị thông báo thân thiện và tự động đóng dialog + kích hoạt callback reload sau khi lưu thành công.
 - **Verification:**
-  - [ ] Mở dialog ở chế độ test thêm và sửa sự cố.
+  - [x] Mở dialog ở chế độ test thêm và sửa sự cố.
 - **Dependencies:** Task 3, Task 6
 - **Files touched:** `ui/dialogs/__init__.py`, `ui/dialogs/incident_dialog.py`
 - **Scope:** Small (2 files)
@@ -121,8 +121,8 @@
 ---
 
 ### 🏁 Checkpoint 2: Xác nhận tầng Component & Dialog
-- [ ] Reusable components hoạt động độc lập và hiển thị phong cách phẳng hiện đại.
-- [ ] `IncidentDialog` mở lên, hiển thị đúng dữ liệu sự cố và lưu vào DB chính xác.
+- [x] Reusable components hoạt động độc lập và hiển thị phong cách phẳng hiện đại.
+- [x] `IncidentDialog` mở lên, hiển thị đúng dữ liệu sự cố và lưu vào DB chính xác.
 
 ---
 
