@@ -21,3 +21,6 @@ env/
 Thumbs.db
 Desktop.ini
 
+# Application logs
+*.log
+

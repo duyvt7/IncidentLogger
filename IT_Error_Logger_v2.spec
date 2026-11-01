@@ -1,12 +1,25 @@
 # -*- mode: python ; coding: utf-8 -*-
+from pathlib import Path
+import os
 
+project_dir = os.path.abspath(os.path.dirname(__file__))
 
 a = Analysis(
-    ['d:\\DuyData\\IT Error Logger\\main.py'],
-    pathex=[],
+    ['main.py'],
+    pathex=[project_dir],
     binaries=[],
-    datas=[],
-    hiddenimports=['babel.numbers', 'tkcalendar'],
+    datas=[
+        ('app_icon.ico', '.'),
+        ('icon.png', '.'),
+    ],
+    hiddenimports=[
+        'openpyxl',
+        'openpyxl.styles',
+        'tkcalendar',
+        'babel',
+        'babel.numbers',
+        'sqlite3',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -35,5 +48,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['d:\\DuyData\\IT Error Logger\\app_icon.ico'],
+    icon='app_icon.ico',
 )

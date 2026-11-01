@@ -129,17 +129,17 @@
 ## Giai đoạn 3: Views, Controller & Hoàn thiện Production
 
 ### Task 8: Xây dựng các View chuyên biệt (Modular Views)
-- [ ] Tạo `ui/views/header_view.py`: Thanh Header chứa thông tin ca trực (Dept, Date, Shift, User selector dạng dropdown danh sách nhân sự trực).
-- [ ] Tạo `ui/views/dashboard_view.py`: Hiển thị số liệu thống kê (Total incidents, hôm nay, sự cố mở) qua `StatCard`.
-- [ ] Tạo `ui/views/detail_view.py`: Quản lý danh sách sự cố qua `DataTable`, thanh lọc ngày, nút Thêm/Sửa/Xóa và nút Xuất Excel.
-- [ ] Tạo `ui/views/hmi_view.py`: Bảng lưới theo dõi các chuyền HMI, có nút lưu trạng thái vào database qua `hmi_service`.
-- [ ] Tạo `ui/views/login_view.py`: (Sẵn sàng mở rộng) Khung đăng nhập hoàn chỉnh được đóng gói độc lập để khi cần bật lại chỉ việc kích hoạt từ `settings.AUTH_ENABLED = True`.
+- [x] Tạo `ui/views/header_view.py`: Thanh Header chứa thông tin ca trực (Dept, Date, Shift, User selector dạng dropdown danh sách nhân sự trực).
+- [x] Tạo `ui/views/dashboard_view.py`: Hiển thị số liệu thống kê (Total incidents, hôm nay, sự cố mở) qua `StatCard`.
+- [x] Tạo `ui/views/detail_view.py`: Quản lý danh sách sự cố qua `DataTable`, thanh lọc ngày, nút Thêm/Sửa/Xóa và nút Xuất Excel.
+- [x] Tạo `ui/views/hmi_view.py`: Bảng lưới theo dõi các chuyền HMI, có nút lưu trạng thái vào database qua `hmi_service`.
+- [x] Tạo `ui/views/login_view.py`: (Sẵn sàng mở rộng) Khung đăng nhập hoàn chỉnh được đóng gói độc lập để khi cần bật lại chỉ việc kích hoạt từ `settings.AUTH_ENABLED = True`.
 - **Acceptance criteria:**
-  - [ ] Mỗi View là một Frame độc lập, nhận callbacks và services qua dependency injection.
-  - [ ] Ứng dụng chạy trực tiếp vào các tab chính mà không bị chặn bởi màn hình login.
-  - [ ] Code sạch, không còn cú pháp nén `;`, có docstring mô tả công dụng.
+  - [x] Mỗi View là một Frame độc lập, nhận callbacks và services qua dependency injection.
+  - [x] Ứng dụng chạy trực tiếp vào các tab chính mà không bị chặn bởi màn hình login.
+  - [x] Code sạch, không còn cú pháp nén `;`, có docstring mô tả công dụng.
 - **Verification:**
-  - [ ] Từng view có thể khởi tạo độc lập và hiển thị đầy đủ các thành phần.
+  - [x] Từng view có thể khởi tạo độc lập và hiển thị đầy đủ các thành phần.
 - **Dependencies:** Task 6, Task 7
 - **Files touched:** `ui/views/__init__.py`, `ui/views/header_view.py`, `ui/views/dashboard_view.py`, `ui/views/detail_view.py`, `ui/views/hmi_view.py`, `ui/views/login_view.py`
 - **Scope:** Medium (6 files)
@@ -147,17 +147,17 @@
 ---
 
 ### Task 9: Tái cấu trúc Application Controller và main.py
-- [ ] Tái cấu trúc `main.py`:
+- [x] Tái cấu trúc `main.py`:
   - Khởi tạo ứng dụng `ITIncidentApp(tk.Tk)`.
   - Mở trực tiếp không gian làm việc chính (HeaderView + Notebook các tabs: Dashboard, 2. Detail, 3. HMI Checking).
   - Tích hợp hook kiểm tra `AUTH_ENABLED`: nếu `True` mới hiện login, nếu `False` vào thẳng app (khả năng mở rộng tối đa).
   - Khởi tạo cấu hình logging để ghi lại các lỗi chưa xử lý.
   - Tích hợp icon ứng dụng `app_icon.ico`.
 - **Acceptance criteria:**
-  - [ ] `main.py` chỉ còn khoảng 60-80 dòng code sạch, vai trò điều phối ứng dụng.
-  - [ ] Vào ứng dụng ngay lập tức, chuyển tab, lưu dữ liệu, xuất Excel mượt mà.
+  - [x] `main.py` chỉ còn khoảng 60-80 dòng code sạch, vai trò điều phối ứng dụng.
+  - [x] Vào ứng dụng ngay lập tức, chuyển tab, lưu dữ liệu, xuất Excel mượt mà.
 - **Verification:**
-  - [ ] Khởi chạy `python main.py`, kiểm tra đầy đủ mọi tính năng.
+  - [x] Khởi chạy `python main.py`, kiểm tra đầy đủ mọi tính năng.
 - **Dependencies:** Task 8
 - **Files touched:** `main.py`
 - **Scope:** Small (1-2 files)
@@ -165,13 +165,13 @@
 ---
 
 ### Task 10: Tinh chỉnh PyInstaller Spec và Tài liệu hóa kiến trúc
-- [ ] Cập nhật file spec PyInstaller `IT_Error_Logger_v2.spec` để nhận diện cấu trúc thư mục mới (`config/`, `database/`, `services/`, `ui/`), icon và hidden imports (`openpyxl`, `tkcalendar`, `babel`).
-- [ ] Tạo tài liệu hướng dẫn dự án `README.md` giải thích chi tiết cấu trúc thư mục, chức năng từng module, cách mở rộng tính năng đăng nhập sau này (`AUTH_ENABLED`), cách cài đặt và build file exe.
+- [x] Cập nhật file spec PyInstaller `IT_Error_Logger_v2.spec` để nhận diện cấu trúc thư mục mới (`config/`, `database/`, `services/`, `ui/`), icon và hidden imports (`openpyxl`, `tkcalendar`, `babel`).
+- [x] Tạo tài liệu hướng dẫn dự án `README.md` giải thích chi tiết cấu trúc thư mục, chức năng từng module, cách mở rộng tính năng đăng nhập sau này (`AUTH_ENABLED`), cách cài đặt và build file exe.
 - **Acceptance criteria:**
-  - [ ] File spec tương thích với cấu trúc mã nguồn mới.
-  - [ ] Tài liệu `README.md` mô tả rõ ràng cách bật lại tính năng Auth khi cần.
+  - [x] File spec tương thích với cấu trúc mã nguồn mới.
+  - [x] Tài liệu `README.md` mô tả rõ ràng cách bật lại tính năng Auth khi cần.
 - **Verification:**
-  - [ ] Kiểm tra PyInstaller phân tích spec thành công: `pyinstaller --dry-run IT_Error_Logger_v2.spec` (hoặc kiểm tra cú pháp spec).
+  - [x] Kiểm tra PyInstaller phân tích spec thành công: `pyinstaller --dry-run IT_Error_Logger_v2.spec` (hoặc kiểm tra cú pháp spec).
 - **Dependencies:** Task 9
 - **Files touched:** `IT_Error_Logger_v2.spec`, `README.md`
 - **Scope:** Small (2 files)
@@ -179,8 +179,8 @@
 ---
 
 ### 🏁 Checkpoint 3 (Final): Kiểm tra toàn diện sẵn sàng Production
-- [ ] Tất cả unit tests đều PASS.
-- [ ] Ứng dụng mở trực tiếp không cần đăng nhập: Dashboard -> Quản lý sự cố -> Kiểm tra HMI -> Xuất báo cáo Excel.
-- [ ] Dữ liệu 53 bản ghi cũ không bị biến đổi bất thường.
-- [ ] Khả năng mở rộng Auth sẵn sàng: chỉ cần cấu hình `AUTH_ENABLED = True` là có thể tích hợp luồng đăng nhập mà không vỡ ứng dụng.
-- [ ] Code sạch, rõ ràng, không còn cú pháp nén và có đầy đủ docstring mô tả công dụng từng module.
+- [x] Tất cả unit tests đều PASS.
+- [x] Ứng dụng mở trực tiếp không cần đăng nhập: Dashboard -> Quản lý sự cố -> Kiểm tra HMI -> Xuất báo cáo Excel.
+- [x] Dữ liệu 53 bản ghi cũ không bị biến đổi bất thường.
+- [x] Khả năng mở rộng Auth sẵn sàng: chỉ cần cấu hình `AUTH_ENABLED = True` là có thể tích hợp luồng đăng nhập mà không vỡ ứng dụng.
+- [x] Code sạch, rõ ràng, không còn cú pháp nén và có đầy đủ docstring mô tả công dụng từng module.
