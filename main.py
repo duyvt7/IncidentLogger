@@ -16,6 +16,7 @@ from ui.views.header_view import HeaderView
 from ui.views.dashboard_view import DashboardView
 from ui.views.detail_view import DetailView
 from ui.views.hmi_view import HmiView
+from ui.views.daily_inspection_view import DailyInspectionView
 from ui.views.login_view import LoginView
 
 logger = logging.getLogger(__name__)
@@ -105,6 +106,13 @@ class ITOperationsApp(tk.Tk):
         )
         notebook.add(self.detail_view, text="  📝 2. Detail  ")
         notebook.add(self.hmi_view, text="  ✅ 3. HMI Checking  ")
+
+        # Tab 4: Daily Inspection
+        self.daily_view = DailyInspectionView(
+            notebook,
+            get_shift_info_cb=self.header_view.get_shift_info,
+        )
+        notebook.add(self.daily_view, text="  📋 4. Daily Inspection  ")
 
         logger.info("Main workspace loaded successfully.")
 

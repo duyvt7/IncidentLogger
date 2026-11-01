@@ -16,7 +16,11 @@ from services.incident_service import (
     get_incidents,
     delete_incident,
 )
-from services.export_service import export_shift_report_to_excel
+from services.export_service import (
+    export_shift_report_to_excel,
+    get_shift_report_master_path,
+    get_sheet_tab_name,
+)
 from ui.components.data_table import DataTable
 from ui.dialogs.incident_dialog import IncidentDialog
 
@@ -42,7 +46,7 @@ class DetailView(tk.Frame):
         self.filter_active: bool = False
 
         self._build_ui()
-        self.load_all_incidents()
+        self.load_today_incidents()
 
     def _build_ui(self) -> None:
         """Constructs action bar, filter bar, table, and status bar."""
@@ -147,6 +151,19 @@ class DetailView(tk.Frame):
 
         tk.Button(
             filter_bar,
+            text="📅 Hôm nay",
+            bg=Colors.BORDER,
+            fg=Colors.TEXT_MAIN,
+            font=Fonts.MAIN,
+            relief="flat",
+            padx=10,
+            pady=3,
+            cursor="hand2",
+            command=self.load_today_incidents,
+        ).pack(side="left", padx=4)
+
+        tk.Button(
+            filter_bar,
             text="↺ Xem tất cả",
             bg=Colors.BORDER,
             fg=Colors.TEXT_DIM,
@@ -240,15 +257,35 @@ class DetailView(tk.Frame):
                 item_id=str(r["id"]),
             )
 
+    def load_today_incidents(self) -> None:
+        """Loads incidents for today only (default view)."""
+        self.filter_active = False
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        try:
+            self.date_from.set_date(datetime.now().date())
+            self.date_to.set_date(datetime.now().date())
+        except Exception:
+            pass
+
+        try:
+            rows = get_incidents(start_date=today_str, end_date=today_str)
+            self._populate_table(rows)
+            db_name = get_db_path().name
+            self.lbl_status.configure(
+                text=f"📅 Hôm nay: {today_str} — 📂 {db_name} — Số lượng: {len(rows)} sự cố"
+            )
+        except Exception as exc:
+            messagebox.showerror("Lỗi tải dữ liệu", f"Không thể tải danh sách sự cố hôm nay: {exc}")
+
     def load_all_incidents(self) -> None:
-        """Loads all incidents without date filtering."""
+        """Loads all historical incidents without date filtering."""
         self.filter_active = False
         try:
             rows = get_incidents()
             self._populate_table(rows)
             db_name = get_db_path().name
             self.lbl_status.configure(
-                text=f"📂 Cơ sở dữ liệu: {db_name} | Tổng số: {len(rows)} sự cố"
+                text=f"📂 Cơ sở dữ liệu: {db_name} | Tất cả: {len(rows)} sự cố"
             )
         except Exception as exc:
             messagebox.showerror("Lỗi tải dữ liệu", f"Không thể tải danh sách sự cố: {exc}")
@@ -315,50 +352,89 @@ class DetailView(tk.Frame):
         if self.filter_active:
             self.filter_by_date_range()
         else:
-            self.load_all_incidents()
+            self.load_today_incidents()
 
         if self.on_data_changed_cb:
             self.on_data_changed_cb()
 
     def export_excel(self) -> None:
-        """Prompts destination path and exports current view to formatted Excel."""
-        shift_info = self.get_shift_info_cb() if self.get_shift_info_cb else {}
-        d1 = self.date_from.get_date().strftime("%Y-%m-%d")
-        d2 = self.date_to.get_date().strftime("%Y-%m-%d")
+        """Prompts destination or auto-exports into monthly master workbook tab."""
+        import os
+        from pathlib import Path
 
-        if self.filter_active:
-            rows = get_incidents(start_date=d1, end_date=d2)
-            date_tag = f"{d1}_to_{d2}"
-        else:
-            rows = get_incidents()
-            date_tag = shift_info.get("date", datetime.now().strftime("%Y-%m-%d"))
+        shift_info = self.get_shift_info_cb() if self.get_shift_info_cb else {}
+        date_str = shift_info.get("date", datetime.now().strftime("%Y-%m-%d"))
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+        except Exception:
+            dt = datetime.now()
 
         sel_shift = shift_info.get("shift", "Ca Ngày")
-        shift_tag = "DayShift" if "Ngày" in sel_shift else "NightShift"
-        default_filename = f"Shift Report_{date_tag}_{shift_tag}.xlsx"
+        default_target_path = get_shift_report_master_path(dt)
+        sheet_name = get_sheet_tab_name(dt, sel_shift)
 
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".xlsx",
-            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
-            initialfile=default_filename,
+        # Ask user: export directly to master file, choose another file, or cancel
+        choice = messagebox.askyesnocancel(
+            "Xuất Shift Report",
+            f"Hệ thống sẽ xuất báo cáo vào tab:\n📑 [{sheet_name}]\n\n"
+            f"Trong file Master tháng:\n📁 {default_target_path}\n\n"
+            "• Chọn [Yes] để ghi trực tiếp vào file Master này.\n"
+            "• Chọn [No] để chọn một file Excel khác.\n"
+            "• Chọn [Cancel] để hủy thao tác.",
         )
-        if not file_path:
-            return
+        if choice is None:
+            return  # User clicked Cancel
+
+        if choice is True:
+            target_file = default_target_path
+        else:
+            target_file = filedialog.askopenfilename(
+                title="Chọn file Shift Report để ghi thêm tab",
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+                initialdir=str(default_target_path.parent) if default_target_path.parent.exists() else None,
+                initialfile=default_target_path.name,
+            )
+            if not target_file:
+                target_file = filedialog.asksaveasfilename(
+                    title="Hoặc lưu thành file mới",
+                    defaultextension=".xlsx",
+                    filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+                    initialfile=default_target_path.name,
+                )
+                if not target_file:
+                    return
+
+        # Fetch incidents
+        if self.filter_active:
+            d1 = self.date_from.get_date().strftime("%Y-%m-%d")
+            d2 = self.date_to.get_date().strftime("%Y-%m-%d")
+            rows = get_incidents(start_date=d1, end_date=d2)
+        else:
+            # Default to incidents of this shift's date
+            rows = get_incidents(start_date=date_str, end_date=date_str)
 
         incidents = [dict(r) for r in rows]
         hmi_data = self.get_hmi_data_cb() if self.get_hmi_data_cb else {}
 
         ok, msg = export_shift_report_to_excel(
-            filepath=file_path,
+            filepath=target_file,
             dept=shift_info.get("dept", "IT"),
+            section="Dx Engineering Team",
             prepared_by=shift_info.get("user", ""),
+            group="B",
             shift=sel_shift,
+            date_val=dt,
             incidents=incidents,
             hmi_data=hmi_data,
         )
 
         if ok:
-            messagebox.showinfo("Thành công", msg)
+            if messagebox.askyesno("Xuất thành công", f"{msg}\n\nBạn có muốn mở thư mục chứa file không?"):
+                try:
+                    os.startfile(Path(target_file).parent)
+                except Exception:
+                    pass
         else:
             messagebox.showerror("Lỗi xuất file", msg)
 

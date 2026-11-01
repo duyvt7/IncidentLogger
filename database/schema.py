@@ -75,6 +75,22 @@ def init_db(db_path: Optional[Union[str, Path]] = None) -> None:
                 check_date TEXT    NOT NULL DEFAULT (date('now'))
             );
         """)
+        cursor.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_insp_unique 
+            ON daily_inspection(check_date, item_name, time_slot);
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS daily_inspection_meta (
+                check_date       TEXT PRIMARY KEY,
+                inspector_shift1 TEXT,
+                inspector_shift2 TEXT,
+                remark_shift1    TEXT,
+                remark_shift2    TEXT,
+                details_shift1   TEXT,
+                details_shift2   TEXT,
+                updated_at       TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+            );
+        """)
 
         # 4. Bảng Users (hỗ trợ sẵn sàng cho phân hệ đăng nhập khi cần)
         cursor.execute("""

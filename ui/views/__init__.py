@@ -6,6 +6,7 @@ from ui.views.header_view import HeaderView
 from ui.views.dashboard_view import DashboardView
 from ui.views.detail_view import DetailView
 from ui.views.hmi_view import HmiView
+from ui.views.daily_inspection_view import DailyInspectionView
 from ui.views.login_view import LoginView
 
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "DashboardView",
     "DetailView",
     "HmiView",
+    "DailyInspectionView",
     "LoginView",
 ]
 
