@@ -1,186 +1,165 @@
-# Danh Sách Nhiệm Vụ Tái Cấu Trúc Dự Án (Todo List)
+# Danh Sách Nhiệm Vụ Nâng Cấp Ứng Dụng (Todo List)
 
-## Giai đoạn 1: Nền tảng, Cấu hình & Dịch vụ (Foundation & Services)
+## Giai đoạn 1: Lọc sự cố hôm nay & Cải tiến Exporter Shift Report theo tab (Hình 1, 2, 3)
 
-### Task 1: Thiết lập cấu hình tập trung và định nghĩa dependencies
-- [x] Tạo file `requirements.txt` với các thư viện: `openpyxl`, `tkcalendar`, `babel`.
-- [x] Tạo `config/settings.py` chứa hàm xác định đường dẫn ứng dụng, đường dẫn DB (hỗ trợ cả môi trường script và PyInstaller frozen), cấu hình cửa sổ, cờ cấu hình `AUTH_ENABLED = False`, và cấu hình logging.
-- [x] Tạo `config/constants.py` chứa toàn bộ hằng số nghiệp vụ: `DETAIL_STRUCTURE`, `HMI_LINES`, `HMI_COLS`, `CURRENT_SITUATION_OPTIONS`, danh sách kỹ sư trực mặc định (`DEFAULT_OPERATORS`), bảng mã màu UI (`BG`, `CARD_BG`, `PRIMARY`, v.v.), font chữ.
+### Task 1: Cập nhật DetailView chỉ hiển thị sự cố trong ngày hôm nay khi khởi động
+- [ ] Trong `ui/views/detail_view.py`, thay thế `load_all_incidents()` bằng `load_today_incidents()` trong hàm `__init__`.
+- [ ] Đặt giá trị mặc định của 2 DateEntry `date_from` và `date_to` là ngày hôm nay.
+- [ ] Nhãn thanh trạng thái `lbl_status` hiển thị rõ: "📅 Hôm nay: [YYYY-MM-DD] | Số lượng: [X] sự cố".
+- [ ] Bấm nút "🔍 Lọc" sẽ lọc theo khoảng ngày chọn; bấm "↺ Xem tất cả" mới hiển thị toàn bộ lịch sử sự cố.
 - **Acceptance criteria:**
-  - [x] `config/settings.py` resolve chính xác đường dẫn file DB `dist/it_errors.db` hoặc thư mục gốc.
-  - [x] `config/constants.py` gom toàn bộ hằng số từ `main.py` và `database.py` về một nơi duy nhất.
+  - [ ] Khi khởi động hoặc chuyển tab Detail, chỉ hiển thị sự cố có ngày trùng ngày hiện tại.
+  - [ ] Bộ lọc ngày và nút Xem tất cả hoạt động chính xác.
 - **Verification:**
-  - [x] Chạy script kiểm tra import và in ra đường dẫn DB hợp lệ: `python -c "from config.settings import get_db_path; print(get_db_path())"`
+  - [ ] Chạy ứng dụng kiểm tra danh sách sự cố mặc định chỉ tải đúng ngày hôm nay.
 - **Dependencies:** None
-- **Files touched:** `requirements.txt`, `config/__init__.py`, `config/settings.py`, `config/constants.py`
-- **Scope:** Small (3-4 files)
-
----
-
-### Task 2: Tách module kết nối và schema cơ sở dữ liệu
-- [x] Tạo `database/connection.py` cung cấp context manager `get_connection()` an toàn với `sqlite3.Row`, tự động commit/rollback và đóng kết nối.
-- [x] Tạo `database/schema.py` chứa hàm `init_db()` định nghĩa cấu trúc bảng: `incidents`, `hmi_monitoring`, `daily_inspection`, `users`, đảm bảo `IF NOT EXISTS` và bảo tồn dữ liệu cũ.
-- **Acceptance criteria:**
-  - [x] Không làm mất bất kỳ bản ghi nào trong `dist/it_errors.db`.
-  - [x] Kết nối được quản lý an toàn qua context manager, không rò rỉ connection.
-- **Verification:**
-  - [x] Chạy kiểm tra kết nối và đếm số lượng bản ghi: `python -c "from database.connection import get_connection; from database.schema import init_db; init_db(); conn = get_connection(); print(conn.execute('SELECT COUNT(*) FROM incidents').fetchone()[0])"` trả về 53.
-- **Dependencies:** Task 1
-- **Files touched:** `database/__init__.py`, `database/connection.py`, `database/schema.py`
-- **Scope:** Small (3 files)
-
----
-
-### Task 3: Triển khai Session Service (Extensible Auth) & Domain Services
-- [x] Tạo `services/session_service.py`: quản lý thông tin phiên làm việc của người trực hiện tại (`current_operator`), cung cấp interface trừu tượng `AuthBackend` để khi cần bật login trong tương lai chỉ cần implement mà không sửa UI/service khác.
-- [x] Tạo `services/incident_service.py`: các hàm CRUD (`add_incident`, `get_incidents`, `get_incident_by_id`, `update_incident`, `delete_incident`, `get_incident_statistics`).
-- [x] Tạo `services/hmi_service.py`: lưu và tải trạng thái HMI (`save_hmi_status`, `load_hmi_status`).
-- **Acceptance criteria:**
-  - [x] `session_service` cung cấp phương thức lấy và đổi operator hiện tại dễ dàng.
-  - [x] Các hàm nghiệp vụ trả về đối tượng dữ liệu rõ ràng (dict/dataclass), có type hinting và docstrings.
-- **Verification:**
-  - [x] Viết script kiểm tra session và truy vấn danh sách sự cố thành công.
-- **Dependencies:** Task 2
-- **Files touched:** `services/__init__.py`, `services/session_service.py`, `services/incident_service.py`, `services/hmi_service.py`
-- **Scope:** Medium (4 files)
-
----
-
-### Task 4: Tách và chuẩn hóa Export Service (Excel)
-- [x] Tạo `services/export_service.py` tách toàn bộ logic xuất Excel từ `database.py`.
-- [x] Chuẩn hóa hàm `export_shift_report_to_excel(filepath, ...)`, tách nhỏ logic format header, environment, hardware inspection, facility, incidents, và HMI checking.
-- [x] Xử lý ngoại lệ thân thiện khi thiếu thư viện `openpyxl` hoặc file bị khóa bởi ứng dụng khác (PermissionError).
-- **Acceptance criteria:**
-  - [x] File Excel xuất ra giữ nguyên 100% bố cục và định dạng giống file cũ của `Shift_Report_Full_Format.xlsx`.
-  - [x] Xử lý trường hợp ghi đè an toàn khi file Excel đang mở.
-- **Verification:**
-  - [x] Chạy test xuất file Excel ra thư mục tạm và xác nhận file tồn tại và mở được.
-- **Dependencies:** Task 1, Task 3
-- **Files touched:** `services/export_service.py`
+- **Files touched:** `ui/views/detail_view.py`
 - **Scope:** Small (1 file)
 
 ---
 
-### Task 5: Viết bộ kiểm thử tự động (Unit Tests) cho Services & Database
-- [x] Tạo thư mục `tests/` với các test case:
-  - `tests/test_database.py`: Kiểm thử kết nối và schema.
-  - `tests/test_session_service.py`: Kiểm thử quản lý session và extension points.
-  - `tests/test_incident_service.py`: Kiểm thử thêm/sửa/xóa/lọc sự cố.
-  - `tests/test_export_service.py`: Kiểm thử xuất file Excel.
+### Task 2: Cải tiến bố cục định dạng Shift Report khớp 100% Hình 1 & 2
+- [ ] Sửa thông tin tiêu đề:
+  - `Sect.: Dx Engineering Team` (thay cho `IT Management`).
+  - Tiêu đề: `Shift Report` (E1), ngày báo cáo `(DD-Mon-YYYY)` (E2).
+  - Thêm mục `Group: B` (hoặc lấy từ header).
+- [ ] Chuẩn hóa lại vị trí các dòng chi tiết:
+  - Dòng 19: `2. Detail`
+  - Dòng 20: Header bảng `Category`, `Time`, `Failure`, `Reason`, `Solution`, `Current Situation`, `Contact Number` (Màu nền `#CCFFFF`).
+  - Dòng 21-22: `Indoor Environment` (Nhiệt độ dòng 21, Độ ẩm dòng 22).
+  - Dòng 23-31: `H/W Inspection` (MES Server -> Network).
+  - Dòng 32-35: `Facility Inspection` (UPS, Điều hòa, Cháy chập, Bình chữa cháy).
+  - Dòng 36: `Security Inspection` (Khóa cửa).
+  - Dòng 37: `MES Server Backup` (`OK`).
+  - Dòng 38: `MES Application` (`OK`).
+  - Dòng 39: `Remark` (`OK`, nội dung ghi chú ở cột D).
+- [ ] Chuẩn hóa bảng 3. HMI Checking (Hình 2):
+  - Dòng 41: Khung viền đậm `3. HMI checking` căn giữa từ cột B đến H.
+  - Dòng 42: Header bảng: `Line` (cột B), `MES link SCC` (cột C), `SCC Link PLC` (cột D), `Application Link` (gộp E:F), `Remark` (gộp G:H).
+  - Dòng 43-48: Các chuyền PCM, CAL, FH-RCL, CR-RCL, PDS, CLTS với các ô gộp E:F và G:H tương ứng.
 - **Acceptance criteria:**
-  - [x] 100% các unit test chạy độc lập trên cơ sở dữ liệu bộ nhớ (in-memory SQLite `:memory:`) không làm ảnh hưởng đến dữ liệu thực tế.
-  - [x] Mọi test pass 100%.
+  - [ ] Bố cục các dòng, cột, ô gộp và màu nền trùng khớp 100% với Hình 1 và Hình 2.
 - **Verification:**
-  - [x] Chạy lệnh `python -m unittest discover tests` thành công (0 failure, 0 error).
-- **Dependencies:** Task 1, Task 2, Task 3, Task 4
-- **Files touched:** `tests/__init__.py`, `tests/test_database.py`, `tests/test_session_service.py`, `tests/test_incident_service.py`, `tests/test_export_service.py`
-- **Scope:** Medium (5 files)
-
----
-
-### 🏁 Checkpoint 1: Xác nhận tầng Foundation & Services
-- [x] Tất cả các bài kiểm tra tự động `python -m unittest discover tests` đều PASSED.
-- [x] Dữ liệu 53 sự cố trong `dist/it_errors.db` được bảo toàn nguyên vẹn.
-- [x] Không còn bất kỳ mã nghiệp vụ hay export nào bị phụ thuộc lỏng lẻo.
-
----
-
-## Giai đoạn 2: Reusable UI Components & Dialogs
-
-### Task 6: Xây dựng UI Theme và Reusable UI Components
-- [x] Tạo `ui/styles.py` cấu hình ttk.Style đồng bộ (Theme clam, Treeview styling, Notebook tab styling, combobox styling).
-- [x] Tạo `ui/components/stat_card.py`: Widget hiển thị thẻ KPI/thống kê (Title, Value, Accent Color, Icon).
-- [x] Tạo `ui/components/date_time_picker.py`: Widget chọn kết hợp DateEntry + Giờ + Phút có validation và method `get_datetime()`, `set_datetime()`.
-- [x] Tạo `ui/components/data_table.py`: Bảng Treeview bọc sẵn thanh cuộn dọc/ngang, cấu hình cột tự động, bắt sự kiện click/double-click.
-- **Acceptance criteria:**
-  - [x] Các component kế thừa `tk.Frame` hoặc `ttk.Frame`, dễ dàng tái sử dụng ở bất kỳ view nào.
-  - [x] Cung cấp API rõ ràng (`get_value()`, `set_value()`, `bind_event()`).
-- **Verification:**
-  - [x] Kiểm tra tạo component trong script test GUI mà không phát sinh lỗi.
-- **Dependencies:** Task 1
-- **Files touched:** `ui/__init__.py`, `ui/styles.py`, `ui/components/__init__.py`, `ui/components/stat_card.py`, `ui/components/date_time_picker.py`, `ui/components/data_table.py`
-- **Scope:** Medium (5 files)
-
----
-
-### Task 7: Tái cấu trúc IncidentDialog sử dụng Reusable Components
-- [x] Tạo `ui/dialogs/incident_dialog.py` kế thừa `tk.Toplevel`.
-- [x] Sử dụng `DateTimePicker` cho trường chọn thời gian.
-- [x] Xây dựng form nhập liệu với các input rõ ràng, xử lý combobox category -> sub_category đồng bộ tự động.
-- [x] Tự động gán người báo cáo (`reporter`) mặc định từ session hiện tại.
-- [x] Validate dữ liệu đầu vào (báo lỗi nếu thiếu Failure hoặc thời gian không hợp lệ) trước khi gọi `incident_service`.
-- **Acceptance criteria:**
-  - [x] Hộp thoại hỗ trợ cả 2 chế độ: Thêm mới (`edit_id=None`) và Cập nhật (`edit_id=<id>`).
-  - [x] Hiển thị thông báo thân thiện và tự động đóng dialog + kích hoạt callback reload sau khi lưu thành công.
-- **Verification:**
-  - [x] Mở dialog ở chế độ test thêm và sửa sự cố.
-- **Dependencies:** Task 3, Task 6
-- **Files touched:** `ui/dialogs/__init__.py`, `ui/dialogs/incident_dialog.py`
+  - [ ] Xuất thử file Excel kiểm tra từng tọa độ ô và gộp cột.
+- **Dependencies:** None
+- **Files touched:** `services/export_service.py`, `config/settings.py`
 - **Scope:** Small (2 files)
 
 ---
 
-### 🏁 Checkpoint 2: Xác nhận tầng Component & Dialog
-- [x] Reusable components hoạt động độc lập và hiển thị phong cách phẳng hiện đại.
-- [x] `IncidentDialog` mở lên, hiển thị đúng dữ liệu sự cố và lưu vào DB chính xác.
+### Task 3: Nâng cấp Export Service xuất vào Tab mới trong Master File (Hình 3)
+- [ ] Xây dựng hàm xác định đường dẫn file Master: `get_shift_report_path(date_str)` trả về `D:\Report\<YYYY>\<Month_name>\Shift report <MM-YYYY>.xlsx` (tự động tạo thư mục nếu chưa có).
+- [ ] Quy tắc đặt tên tab: `DD-Mon-YYYY (Shift 1)` cho Ca Ngày và `DD-Mon-YYYY (Shift 2)` cho Ca Đêm (ví dụ: `29-Oct-2026 (Shift 2)`).
+- [ ] Nếu file đã tồn tại: mở bằng `openpyxl.load_workbook()`; nếu tab đã có thì xóa tab cũ và thay thế bằng tab mới cập nhật. Nếu file chưa có thì tạo mới workbook.
+- [ ] Thêm tùy chọn trên hộp thoại để người dùng duyệt chọn file khác nếu không muốn lưu vào đường dẫn mặc định.
+- **Acceptance criteria:**
+  - [ ] Xuất trực tiếp vào tab trong file tháng `D:\Report\...\Shift report MM-YYYY.xlsx` mà không tạo file rời.
+  - [ ] Ghi đè/cập nhật tab cũ an toàn nếu tab đã tồn tại.
+- **Verification:**
+  - [ ] Chạy test xuất 2 ca trực khác nhau trên cùng 1 ngày, kiểm tra file có đủ 2 tab `(Shift 1)` và `(Shift 2)`.
+- **Dependencies:** Task 2
+- **Files touched:** `services/export_service.py`, `ui/views/detail_view.py`
+- **Scope:** Small (2 files)
 
 ---
 
-## Giai đoạn 3: Views, Controller & Hoàn thiện Production
-
-### Task 8: Xây dựng các View chuyên biệt (Modular Views)
-- [x] Tạo `ui/views/header_view.py`: Thanh Header chứa thông tin ca trực (Dept, Date, Shift, User selector dạng dropdown danh sách nhân sự trực).
-- [x] Tạo `ui/views/dashboard_view.py`: Hiển thị số liệu thống kê (Total incidents, hôm nay, sự cố mở) qua `StatCard`.
-- [x] Tạo `ui/views/detail_view.py`: Quản lý danh sách sự cố qua `DataTable`, thanh lọc ngày, nút Thêm/Sửa/Xóa và nút Xuất Excel.
-- [x] Tạo `ui/views/hmi_view.py`: Bảng lưới theo dõi các chuyền HMI, có nút lưu trạng thái vào database qua `hmi_service`.
-- [x] Tạo `ui/views/login_view.py`: (Sẵn sàng mở rộng) Khung đăng nhập hoàn chỉnh được đóng gói độc lập để khi cần bật lại chỉ việc kích hoạt từ `settings.AUTH_ENABLED = True`.
-- **Acceptance criteria:**
-  - [x] Mỗi View là một Frame độc lập, nhận callbacks và services qua dependency injection.
-  - [x] Ứng dụng chạy trực tiếp vào các tab chính mà không bị chặn bởi màn hình login.
-  - [x] Code sạch, không còn cú pháp nén `;`, có docstring mô tả công dụng.
-- **Verification:**
-  - [x] Từng view có thể khởi tạo độc lập và hiển thị đầy đủ các thành phần.
-- **Dependencies:** Task 6, Task 7
-- **Files touched:** `ui/views/__init__.py`, `ui/views/header_view.py`, `ui/views/dashboard_view.py`, `ui/views/detail_view.py`, `ui/views/hmi_view.py`, `ui/views/login_view.py`
-- **Scope:** Medium (6 files)
+### 🏁 Checkpoint 1: Xác nhận Giai đoạn 1
+- [ ] Tab Detail mặc định hiển thị đúng sự cố hôm nay.
+- [ ] Xuất Shift Report tạo đúng tab trong file `D:\Report\...\Shift report MM-YYYY.xlsx`.
+- [ ] Cấu trúc tab xuất ra khớp hoàn toàn với Hình 1 và Hình 2.
 
 ---
 
-### Task 9: Tái cấu trúc Application Controller và main.py
-- [x] Tái cấu trúc `main.py`:
-  - Khởi tạo ứng dụng `ITIncidentApp(tk.Tk)`.
-  - Mở trực tiếp không gian làm việc chính (HeaderView + Notebook các tabs: Dashboard, 2. Detail, 3. HMI Checking).
-  - Tích hợp hook kiểm tra `AUTH_ENABLED`: nếu `True` mới hiện login, nếu `False` vào thẳng app (khả năng mở rộng tối đa).
-  - Khởi tạo cấu hình logging để ghi lại các lỗi chưa xử lý.
-  - Tích hợp icon ứng dụng `app_icon.ico`.
+## Giai đoạn 2: Dịch vụ & Giao diện Tab Daily Inspection (Hình 4)
+
+### Task 4: Xây dựng Daily Inspection Service & Excel Exporter
+- [ ] Tạo `services/daily_inspection_service.py`:
+  - Định nghĩa danh sách 28 hạng mục kiểm tra (Server, Storage, Network, UPS, Air condition, PCCC, An ninh...).
+  - Định nghĩa 24 mốc giờ: Ca 1 (`8:00` -> `19:00`), Ca 2 (`20:00` -> `7:00`).
+  - Hàm `generate_default_daily_data(date_str, inspector_name)`: điền sẵn 22°C, 46%, tất cả `V`, `-` cho Man IN-OUT, tên người kiểm tra.
+  - Hàm `save_daily_inspection(date_str, data)` và `load_daily_inspection(date_str)`: lưu/đọc dữ liệu theo ngày trong SQLite.
+  - Hàm `export_daily_inspection_to_excel(date_str, data, filepath)`: ghi tab có tên `DD-MM-YYYY` (ví dụ: `29-10-2026`) vào file `D:\Report\<YYYY>\<Month_name>\Daily inspection <MM-YYYY>.xlsx` khớp 100% mẫu Hình 4.
 - **Acceptance criteria:**
-  - [x] `main.py` chỉ còn khoảng 60-80 dòng code sạch, vai trò điều phối ứng dụng.
-  - [x] Vào ứng dụng ngay lập tức, chuyển tab, lưu dữ liệu, xuất Excel mượt mà.
+  - [ ] Lưu và đọc dữ liệu 24 mốc giờ không bị mất mát.
+  - [ ] File Excel `Daily inspection MM-YYYY.xlsx` được ghi thêm tab chuẩn định dạng Hình 4.
 - **Verification:**
-  - [x] Khởi chạy `python main.py`, kiểm tra đầy đủ mọi tính năng.
-- **Dependencies:** Task 8
+  - [ ] Viết test tự động kiểm tra lưu DB và xuất file Excel Daily Inspection.
+- **Dependencies:** Task 3
+- **Files touched:** `services/daily_inspection_service.py`, `database/schema.py`
+- **Scope:** Medium (2 files)
+
+---
+
+### Task 5: Xây dựng giao diện DailyInspectionView
+- [ ] Tạo `ui/views/daily_inspection_view.py`:
+  - Thanh công cụ trên cùng: Bộ chọn ngày kiểm tra, nút `⚡ Tạo dữ liệu mặc định hôm nay`, nút `💾 Lưu dữ liệu`, nút `📤 Xuất Excel Daily Inspection`.
+  - Bảng lưới hiển thị 28 hạng mục x 24 cột khung giờ.
+  - Cho phép click để chuyển đổi nhanh giữa `V` (Bình thường) và `X` (Bất thường).
+  - Dòng nhiệt độ, độ ẩm, người kiểm tra và ghi chú cho phép chỉnh sửa dễ dàng.
+  - Giao diện có thanh cuộn ngang/dọc mượt mà.
+- **Acceptance criteria:**
+  - [ ] Giao diện trực quan, thao tác nhanh chỉ với 1 click để tạo dữ liệu mặc định hoặc chuyển đổi V/X.
+  - [ ] Bấm lưu hoặc xuất Excel có thông báo phản hồi rõ ràng.
+- **Verification:**
+  - [ ] Khởi tạo view, click tạo dữ liệu mặc định và lưu thành công.
+- **Dependencies:** Task 4
+- **Files touched:** `ui/views/daily_inspection_view.py`, `ui/views/__init__.py`
+- **Scope:** Medium (2 files)
+
+---
+
+### Task 6: Tích hợp Tab Daily Inspection vào main.py
+- [ ] Trong `main.py`, khởi tạo `DailyInspectionView` và thêm vào Notebook làm tab thứ 4: `notebook.add(self.daily_view, text="  📋 4. Daily Inspection  ")`.
+- [ ] Đồng bộ tên người trực từ Header ca trực vào trường `Inspected by` của Daily Inspection.
+- **Acceptance criteria:**
+  - [ ] Ứng dụng có đủ 4 tab: Dashboard, Detail, HMI Checking, Daily Inspection.
+  - [ ] Chuyển tab mượt mà, không giật lag.
+- **Verification:**
+  - [ ] Chạy `python main.py` kiểm tra tab mới hiển thị và hoạt động đầy đủ tính năng.
+- **Dependencies:** Task 5
 - **Files touched:** `main.py`
-- **Scope:** Small (1-2 files)
+- **Scope:** Small (1 file)
 
 ---
 
-### Task 10: Tinh chỉnh PyInstaller Spec và Tài liệu hóa kiến trúc
-- [x] Cập nhật file spec PyInstaller `IT_Error_Logger_v2.spec` để nhận diện cấu trúc thư mục mới (`config/`, `database/`, `services/`, `ui/`), icon và hidden imports (`openpyxl`, `tkcalendar`, `babel`).
-- [x] Tạo tài liệu hướng dẫn dự án `README.md` giải thích chi tiết cấu trúc thư mục, chức năng từng module, cách mở rộng tính năng đăng nhập sau này (`AUTH_ENABLED`), cách cài đặt và build file exe.
+### 🏁 Checkpoint 2: Xác nhận Giai đoạn 2
+- [ ] Tab Daily Inspection hoạt động đầy đủ trên giao diện.
+- [ ] Nút xuất Excel tạo đúng tab ngày trong file `Daily inspection MM-YYYY.xlsx` giống hệt Hình 4.
+
+---
+
+## Giai đoạn 3: Kiểm thử toàn diện & Hoàn thiện
+
+### Task 7: Viết Unit Tests tự động cho các chức năng mới
+- [ ] Tạo `tests/test_daily_inspection.py` kiểm thử service daily inspection.
+- [ ] Bổ sung test kiểm tra xuất tab vào file Excel có sẵn và ghi đè tab trong `tests/test_export_service.py`.
 - **Acceptance criteria:**
-  - [x] File spec tương thích với cấu trúc mã nguồn mới.
-  - [x] Tài liệu `README.md` mô tả rõ ràng cách bật lại tính năng Auth khi cần.
+  - [ ] 100% các bài test tự động vượt qua (0 failure, 0 error).
 - **Verification:**
-  - [x] Kiểm tra PyInstaller phân tích spec thành công: `pyinstaller --dry-run IT_Error_Logger_v2.spec` (hoặc kiểm tra cú pháp spec).
-- **Dependencies:** Task 9
-- **Files touched:** `IT_Error_Logger_v2.spec`, `README.md`
+  - [ ] Chạy lệnh `python -m unittest discover tests`.
+- **Dependencies:** Task 6
+- **Files touched:** `tests/test_daily_inspection.py`, `tests/test_export_service.py`
 - **Scope:** Small (2 files)
 
 ---
 
-### 🏁 Checkpoint 3 (Final): Kiểm tra toàn diện sẵn sàng Production
-- [x] Tất cả unit tests đều PASS.
-- [x] Ứng dụng mở trực tiếp không cần đăng nhập: Dashboard -> Quản lý sự cố -> Kiểm tra HMI -> Xuất báo cáo Excel.
-- [x] Dữ liệu 53 bản ghi cũ không bị biến đổi bất thường.
-- [x] Khả năng mở rộng Auth sẵn sàng: chỉ cần cấu hình `AUTH_ENABLED = True` là có thể tích hợp luồng đăng nhập mà không vỡ ứng dụng.
-- [x] Code sạch, rõ ràng, không còn cú pháp nén và có đầy đủ docstring mô tả công dụng từng module.
+### Task 8: Cập nhật tài liệu README.md & Đồng bộ GitHub
+- [ ] Cập nhật `README.md` mô tả tab Daily Inspection mới và cơ chế xuất file Excel Master theo tháng.
+- [ ] Commit toàn bộ mã nguồn lên Git và Push lên GitHub `origin/main`.
+- **Acceptance criteria:**
+  - [ ] README.md phản ánh đầy đủ cấu trúc mới.
+  - [ ] GitHub đồng bộ hoàn tất.
+- **Verification:**
+  - [ ] Kiểm tra `git status` sạch và `git push` thành công.
+- **Dependencies:** Task 7
+- **Files touched:** `README.md`
+- **Scope:** Small (1 file)
+
+---
+
+### 🏁 Checkpoint 3 (Final): Hoàn tất nghiệm thu
+- [ ] Tất cả 4 yêu cầu của người dùng được giải quyết trọn vẹn:
+  1. Tab Detail mặc định chỉ hiện sự cố hôm nay.
+  2. Xuất Shift Report vào tab trong file tháng `D:\Report\...\Shift report MM-YYYY.xlsx`.
+  3. Cấu trúc Shift Report khớp 100% Hình 1 & 2.
+  4. Tab Daily Inspection và xuất Excel giống hệt Hình 4.
