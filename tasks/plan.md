@@ -61,18 +61,18 @@ Kế hoạch này thực hiện 4 yêu cầu cải tiến lớn của người d
 ## 4. Phân đoạn nhiệm vụ (Task Breakdown)
 
 ### Giai đoạn 1: Lọc sự cố hôm nay & Cải tiến Exporter Shift Report theo tab (Hình 1, 2, 3)
-- [ ] **Task 1:** Điều chỉnh `DetailView` và `incident_service` để mặc định chỉ tải sự cố của ngày hôm nay.
-- [ ] **Task 2:** Cập nhật cấu trúc bố cục xuất Shift Report khớp 100% Hình 1 & 2 (`Sect.: Dx Engineering Team`, dòng 19-48, gộp cột HMI).
-- [ ] **Task 3:** Nâng cấp `export_service.py` để xuất/cập nhật tab vào file tổng `D:\Report\<Năm>\<Tháng>\Shift report <MM-YYYY>.xlsx`.
-- [ ] **Checkpoint 1:** Kiểm tra mở tab Detail chỉ thấy sự cố hôm nay; kiểm tra xuất Excel ghi thành công tab vào file Shift report tháng.
+- [x] **Task 1:** Điều chỉnh `DetailView` và `incident_service` để mặc định chỉ tải sự cố của ngày hôm nay.
+- [x] **Task 2:** Cập nhật cấu trúc bố cục xuất Shift Report khớp 100% Hình 1 & 2 (`Sect.: Dx Engineering Team`, dòng 19-48, gộp cột HMI).
+- [x] **Task 3:** Nâng cấp `export_service.py` để xuất/cập nhật tab vào file tổng `D:\Report\<Năm>\<Tháng>\Shift report <MM-YYYY>.xlsx`.
+- [x] **Checkpoint 1:** Kiểm tra mở tab Detail chỉ thấy sự cố hôm nay; kiểm tra xuất Excel ghi thành công tab vào file Shift report tháng.
 
 ### Giai đoạn 2: Dịch vụ & Giao diện Tab Daily Inspection (Hình 4)
-- [ ] **Task 4:** Xây dựng `services/daily_inspection_service.py` quản lý dữ liệu kiểm tra 24 mốc giờ và hàm xuất Excel sheet Daily inspection.
-- [ ] **Task 5:** Xây dựng giao diện `ui/views/daily_inspection_view.py` với bảng 24 cột giờ, nút `⚡ Tạo dữ liệu mặc định`, nút lưu và nút xuất Excel.
-- [ ] **Task 6:** Tích hợp `DailyInspectionView` vào `main.py` làm Tab thứ 4 (`📋 4. Daily Inspection`).
-- [ ] **Checkpoint 2:** Mở app, thao tác trên Tab Daily Inspection, tạo mặc định, lưu vào DB và xuất tab Excel thành công vào file `Daily inspection MM-YYYY.xlsx`.
+- [x] **Task 4:** Xây dựng `services/daily_inspection_service.py` quản lý dữ liệu kiểm tra 24 mốc giờ và hàm xuất Excel sheet Daily inspection.
+- [x] **Task 5:** Xây dựng giao diện `ui/views/daily_inspection_view.py` với bảng 24 cột giờ, nút `⚡ Tạo dữ liệu mặc định`, nút lưu và nút xuất Excel.
+- [x] **Task 6:** Tích hợp `DailyInspectionView` vào `main.py` làm Tab thứ 4 (`📋 4. Daily Inspection`).
+- [x] **Checkpoint 2:** Mở app, thao tác trên Tab Daily Inspection, tạo mặc định, lưu vào DB và xuất tab Excel thành công vào file `Daily inspection MM-YYYY.xlsx`.
 
 ### Giai đoạn 3: Kiểm thử toàn diện & Hoàn thiện
-- [ ] **Task 7:** Viết Unit Tests cho các tính năng mới trong `tests/` (test lọc ngày hôm nay, test ghi tab file Excel có sẵn, test daily inspection).
-- [ ] **Task 8:** Cập nhật tài liệu `README.md`, đồng bộ Git repository lên GitHub.
-- [ ] **Checkpoint 3 (Final):** Chạy toàn bộ 100% tests pass, kiểm tra giao diện thực tế và cấu trúc các file Excel sinh ra.
+- [x] **Task 7:** Viết Unit Tests cho các tính năng mới trong `tests/` (test lọc ngày hôm nay, test ghi tab file Excel có sẵn, test daily inspection).
+- [x] **Task 8:** Cập nhật tài liệu `README.md`, đồng bộ Git repository lên GitHub.
+- [x] **Checkpoint 3 (Final):** Chạy toàn bộ 100% tests pass, kiểm tra giao diện thực tế và cấu trúc các file Excel sinh ra.

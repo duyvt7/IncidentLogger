@@ -526,3 +526,4 @@ def export_daily_inspection_to_excel(
     except Exception as exc:
         logger.error("Failed to export daily inspection: %s", exc)
         return False, f"Lỗi xuất file Daily inspection: {exc}"
+
