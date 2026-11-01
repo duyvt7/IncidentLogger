@@ -1,0 +1,4 @@
+# Dependencies for IT Incident Logger
+openpyxl>=3.1.2
+tkcalendar>=1.6.1
+babel>=2.14.0
