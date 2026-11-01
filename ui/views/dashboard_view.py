@@ -157,3 +157,4 @@ class DashboardView(tk.Frame):
                 fg=Colors.DANGER,
                 font=Fonts.SM,
             ).pack(anchor="w")
+

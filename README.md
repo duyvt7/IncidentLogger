@@ -93,3 +93,4 @@ Sử dụng cấu hình PyInstaller spec đã được cập nhật:
 pyinstaller IT_Error_Logger_v2.spec
 ```
 File thực thi độc lập sẽ được tạo trong thư mục `dist/IT_Error_Logger_v2.exe`. Ứng dụng tự động tìm file `it_errors.db` đặt cùng thư mục file `.exe` khi vận hành.
+

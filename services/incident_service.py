@@ -208,3 +208,4 @@ def get_incident_statistics(
             "open_issues": open_count,
             "by_category": by_category,
         }
+

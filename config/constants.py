@@ -96,3 +96,4 @@ class Fonts:
     HEADER: Tuple[str, int, str] = ("Segoe UI", 18, "bold")
     SM: Tuple[str, int] = ("Segoe UI", 9)
     XS: Tuple[str, int] = ("Segoe UI", 8)
+

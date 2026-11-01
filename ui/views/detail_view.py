@@ -4,11 +4,10 @@ DetailView Component.
 Manages the incident table, date filtering, search, add/edit/delete operations,
 and Excel report exporting.
 """
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, Optional, Sequence
 from datetime import datetime
-from pathlib import Path
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import messagebox, filedialog
 from tkcalendar import DateEntry
 
 from config.constants import Colors, Fonts
@@ -222,27 +221,31 @@ class DetailView(tk.Frame):
             command=self.edit_selected,
         ).pack(side="right", padx=4, pady=6)
 
+    def _populate_table(self, rows: Sequence[Any]) -> None:
+        """Helper to clear and populate table with incident rows."""
+        self.table.clear()
+        for i, r in enumerate(rows, 1):
+            self.table.insert_row(
+                (
+                    i,
+                    r["category"],
+                    r["sub_category"] or "",
+                    r["time"],
+                    r["failure"],
+                    r["reason"] or "",
+                    r["solution"] or "",
+                    r["current_situation"] or "",
+                    r["contact"] or "",
+                ),
+                item_id=str(r["id"]),
+            )
+
     def load_all_incidents(self) -> None:
         """Loads all incidents without date filtering."""
         self.filter_active = False
-        self.table.clear()
         try:
             rows = get_incidents()
-            for i, r in enumerate(rows, 1):
-                self.table.insert_row(
-                    (
-                        i,
-                        r["category"],
-                        r["sub_category"] or "",
-                        r["time"],
-                        r["failure"],
-                        r["reason"] or "",
-                        r["solution"] or "",
-                        r["current_situation"] or "",
-                        r["contact"] or "",
-                    ),
-                    item_id=str(r["id"]),
-                )
+            self._populate_table(rows)
             db_name = get_db_path().name
             self.lbl_status.configure(
                 text=f"📂 Cơ sở dữ liệu: {db_name} | Tổng số: {len(rows)} sự cố"
@@ -256,24 +259,9 @@ class DetailView(tk.Frame):
         d1 = self.date_from.get_date().strftime("%Y-%m-%d")
         d2 = self.date_to.get_date().strftime("%Y-%m-%d")
 
-        self.table.clear()
         try:
             rows = get_incidents(start_date=d1, end_date=d2)
-            for i, r in enumerate(rows, 1):
-                self.table.insert_row(
-                    (
-                        i,
-                        r["category"],
-                        r["sub_category"] or "",
-                        r["time"],
-                        r["failure"],
-                        r["reason"] or "",
-                        r["solution"] or "",
-                        r["current_situation"] or "",
-                        r["contact"] or "",
-                    ),
-                    item_id=str(r["id"]),
-                )
+            self._populate_table(rows)
             db_name = get_db_path().name
             self.lbl_status.configure(
                 text=f"📅 Lọc: {d1} ➔ {d2} — 📂 {db_name} — Kết quả: {len(rows)} sự cố"
@@ -373,3 +361,4 @@ class DetailView(tk.Frame):
             messagebox.showinfo("Thành công", msg)
         else:
             messagebox.showerror("Lỗi xuất file", msg)
+

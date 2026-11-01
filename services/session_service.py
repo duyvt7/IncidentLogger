@@ -12,7 +12,7 @@ import logging
 
 from config.settings import AppSettings
 from config.constants import DEFAULT_OPERATORS
-from database.connection import db_session, get_connection
+from database.connection import db_session
 
 logger = logging.getLogger(__name__)
 

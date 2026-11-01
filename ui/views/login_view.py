@@ -124,3 +124,4 @@ class LoginView(tk.Frame):
                 self.on_login_success(username)
         else:
             messagebox.showerror("Đăng nhập thất bại", msg)
+

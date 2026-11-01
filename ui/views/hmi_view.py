@@ -5,11 +5,14 @@ Interactive health-check monitoring table for industrial manufacturing lines
 (MES Link SCC, SCC Link PLC, Application Link, and Remarks).
 """
 from typing import Any, Dict
+import logging
 import tkinter as tk
 from tkinter import ttk, messagebox
 
 from config.constants import Colors, Fonts, HMI_LINES, HMI_COLS, HMI_STATUS_OPTIONS
 from services.hmi_service import save_hmi_status, load_hmi_status
+
+logger = logging.getLogger(__name__)
 
 
 class HmiView(tk.Frame):
@@ -151,4 +154,5 @@ class HmiView(tk.Frame):
                                 widget.delete(0, "end")
                                 widget.insert(0, val or "")
         except Exception as exc:
-            print(f"Lỗi tải HMI: {exc}")
+            logger.error("Lỗi tải HMI: %s", exc)
+

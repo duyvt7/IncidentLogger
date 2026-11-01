@@ -71,13 +71,6 @@ def export_shift_report_to_excel(
         center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
         left_align = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-        def apply_border_range(min_col: str, max_col: str, row: int) -> None:
-            """Applies thin border to a row range."""
-            start_ord = ord(min_col)
-            end_ord = ord(max_col)
-            for c_code in range(start_ord, end_ord + 1):
-                ws[f"{chr(c_code)}{row}"].border = thin_border
-
         # ── Row 1-5: Header ──
         ws.merge_cells("B1:C1")
         ws.merge_cells("E1:J3")
@@ -139,62 +132,44 @@ def export_shift_report_to_excel(
         ws["C21"].border = thin_border
         ws["C21"].fill = header_fill
 
-        # ── Row 22-23: Indoor Environment ──
-        ws.merge_cells("B22:B23")
-        ws["B22"] = "Indoor Environment"
-        ws["B22"].font = bold_font
-        ws["B22"].fill = header_fill
-        ws["B22"].alignment = center_align
-        ws["B22"].border = thin_border
+        def set_inspection_row(row_idx: int, label: str, value: str = "") -> None:
+            """Formats standard inspection row with labels, borders, and status value."""
+            ws[f"C{row_idx}"] = label
+            ws[f"C{row_idx}"].font = bold_font
+            ws[f"C{row_idx}"].fill = header_fill
+            ws[f"C{row_idx}"].border = thin_border
+            ws[f"H{row_idx}"] = value
+            ws[f"H{row_idx}"].font = normal_font
+            ws[f"H{row_idx}"].border = thin_border
+            for col in ["D", "E", "F", "G", "I"]:
+                ws[f"{col}{row_idx}"].border = thin_border
 
-        env_items = [
-            (22, "Standard Temperature (19 - 25)", inspection_data.get("temperature", "22℃") if inspection_data else "22℃"),
-            (23, "Standard Humidity (35 - 55)", inspection_data.get("humidity", "46%") if inspection_data else "46%"),
-        ]
-        for row_n, label, val in env_items:
-            ws[f"C{row_n}"] = label
-            ws[f"C{row_n}"].font = bold_font
-            ws[f"C{row_n}"].fill = header_fill
-            ws[f"C{row_n}"].border = thin_border
-            ws[f"H{row_n}"] = val
-            ws[f"H{row_n}"].font = normal_font
-            ws[f"H{row_n}"].border = thin_border
-            for c in ["D", "E", "F", "G", "I"]:
-                ws[f"{c}{row_n}"].border = thin_border
+        def make_section_header(cell_range: str, text: str) -> None:
+            ws.merge_cells(cell_range)
+            first_cell = cell_range.split(":")[0]
+            ws[first_cell] = text
+            ws[first_cell].font = bold_font
+            ws[first_cell].fill = header_fill
+            ws[first_cell].alignment = center_align
+            ws[first_cell].border = thin_border
+
+        # ── Row 22-23: Indoor Environment ──
+        make_section_header("B22:B23", "Indoor Environment")
+        env_data = inspection_data or {}
+        set_inspection_row(22, "Standard Temperature (19 - 25)", env_data.get("temperature", "22℃"))
+        set_inspection_row(23, "Standard Humidity (35 - 55)", env_data.get("humidity", "46%"))
 
         # ── Row 24-32: H/W Inspection ──
-        ws.merge_cells("B24:B32")
-        ws["B24"] = "H/W Inspection"
-        ws["B24"].font = bold_font
-        ws["B24"].fill = header_fill
-        ws["B24"].alignment = center_align
-        ws["B24"].border = thin_border
-
+        make_section_header("B24:B32", "H/W Inspection")
         hw_items = [
             "MES Server", "CLTS Server", "HMI Server", "MES PC",
             "CLTS PC", "HMI PC", "MES Printer", "Storage", "Network"
         ]
         for i, item in enumerate(hw_items):
-            row_n = 24 + i
-            ws[f"C{row_n}"] = item
-            ws[f"C{row_n}"].font = bold_font
-            ws[f"C{row_n}"].fill = header_fill
-            ws[f"C{row_n}"].border = thin_border
-            status = inspection_data.get(item, "Running normal") if inspection_data else "Running normal"
-            ws[f"H{row_n}"] = status
-            ws[f"H{row_n}"].font = normal_font
-            ws[f"H{row_n}"].border = thin_border
-            for c in ["D", "E", "F", "G", "I"]:
-                ws[f"{c}{row_n}"].border = thin_border
+            set_inspection_row(24 + i, item, env_data.get(item, "Running normal"))
 
         # ── Row 33-36: Facility Inspection ──
-        ws.merge_cells("B33:B36")
-        ws["B33"] = "Facility Inspection"
-        ws["B33"].font = bold_font
-        ws["B33"].fill = header_fill
-        ws["B33"].alignment = center_align
-        ws["B33"].border = thin_border
-
+        make_section_header("B33:B36", "Facility Inspection")
         facility_items = [
             (33, "UPS", "Running normal"),
             (34, "Air conditioning", "None"),
@@ -202,30 +177,14 @@ def export_shift_report_to_excel(
             (36, "Fire extinguisher", "OK"),
         ]
         for row_n, label, default_val in facility_items:
-            ws[f"C{row_n}"] = label
-            ws[f"C{row_n}"].font = bold_font
-            ws[f"C{row_n}"].fill = header_fill
-            ws[f"C{row_n}"].border = thin_border
-            val = inspection_data.get(label, default_val) if inspection_data else default_val
-            ws[f"H{row_n}"] = val
-            ws[f"H{row_n}"].font = normal_font
-            ws[f"H{row_n}"].border = thin_border
-            for c in ["D", "E", "F", "G", "I"]:
-                ws[f"{c}{row_n}"].border = thin_border
+            set_inspection_row(row_n, label, env_data.get(label, default_val))
 
         # ── Row 37: Security Inspection ──
         ws["B37"] = "Security Inspection"
         ws["B37"].font = bold_font
         ws["B37"].fill = header_fill
         ws["B37"].border = thin_border
-        ws["C37"] = "Locks (doors & windows)"
-        ws["C37"].font = bold_font
-        ws["C37"].fill = header_fill
-        ws["C37"].border = thin_border
-        ws["H37"] = inspection_data.get("Locks (doors & windows)", "OK") if inspection_data else "OK"
-        ws["H37"].border = thin_border
-        for c in ["D", "E", "F", "G", "I"]:
-            ws[f"{c}37"].border = thin_border
+        set_inspection_row(37, "Locks (doors & windows)", env_data.get("Locks (doors & windows)", "OK"))
 
         # ── Row 38: MES Server Backup ──
         ws.merge_cells("B38:C38")
@@ -234,7 +193,7 @@ def export_shift_report_to_excel(
         ws["B38"].fill = header_fill
         ws["B38"].border = thin_border
         ws["C38"].border = thin_border
-        ws["H38"] = inspection_data.get("MES Server Backup", "OK") if inspection_data else "OK"
+        ws["H38"] = env_data.get("MES Server Backup", "OK")
         ws["H38"].border = thin_border
         for c in ["D", "E", "F", "G", "I"]:
             ws[f"{c}38"].border = thin_border
@@ -246,7 +205,7 @@ def export_shift_report_to_excel(
         ws["B39"].fill = header_fill
         ws["B39"].border = thin_border
         ws["C39"].border = thin_border
-        ws["H39"] = inspection_data.get("MES Application", "OK") if inspection_data else "OK"
+        ws["H39"] = env_data.get("MES Application", "OK")
         ws["H39"].border = thin_border
         for c in ["D", "E", "F", "G", "I"]:
             ws[f"{c}39"].border = thin_border
@@ -352,3 +311,4 @@ def export_shift_report_to_excel(
     except Exception as exc:
         logger.error("Failed to export Excel report: %s", exc)
         return False, f"Lỗi khi xuất file Excel: {exc}"
+

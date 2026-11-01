@@ -4,11 +4,9 @@ IT Operations Dashboard - Main Entry Point.
 Clean Application Controller initializing database, styles, shift header,
 and operational tabs (Dashboard, Detail, HMI Checking).
 """
-import sys
 import logging
 import tkinter as tk
 from tkinter import ttk
-from pathlib import Path
 
 from config.settings import AppSettings, setup_logging, get_app_dir
 from config.constants import Colors

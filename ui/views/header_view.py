@@ -161,3 +161,4 @@ class HeaderView(tk.Frame):
             "shift": self.shift_cb.get(),
             "user": self.user_cb.get().strip() or session_service.current_operator,
         }
+

@@ -91,3 +91,4 @@ def apply_app_styles(root: tk.Tk) -> ttk.Style:
     )
 
     return style
+

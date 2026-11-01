@@ -9,7 +9,6 @@ from dataclasses import dataclass
 from pathlib import Path
 import logging
 import sys
-import os
 
 
 def get_app_dir() -> Path:
@@ -26,36 +25,20 @@ def get_app_dir() -> Path:
 def get_db_path() -> Path:
     """
     Dynamically resolves the SQLite database path:
-    1. If frozen (.exe), check if 'it_errors.db' exists in the executable's directory.
-    2. Check if 'it_errors.db' exists in root directory.
-    3. Check if 'it_errors.db' exists in 'dist/' directory (where historical test data resides).
-    4. Default: fallback to 'dist/it_errors.db' if dist exists, else 'it_errors.db' in root.
+    1. Checks for 'it_errors.db' in the app directory.
+    2. Checks for 'it_errors.db' in 'dist/' directory.
+    3. Fallback: 'dist/it_errors.db' if 'dist' folder exists, otherwise root 'it_errors.db'.
     """
     app_dir = get_app_dir()
+    candidates = [
+        app_dir / "it_errors.db",
+        app_dir / "dist" / "it_errors.db",
+    ]
+    for path in candidates:
+        if path.exists():
+            return path
 
-    # 1. Running as frozen binary (.exe)
-    if getattr(sys, "frozen", False):
-        exe_db = app_dir / "it_errors.db"
-        if exe_db.exists():
-            return exe_db
-        dist_db = app_dir / "dist" / "it_errors.db"
-        if dist_db.exists():
-            return dist_db
-
-    # 2. Check root directory
-    root_db = app_dir / "it_errors.db"
-    if root_db.exists():
-        return root_db
-
-    # 3. Check dist directory (historical location in project)
-    dist_db = app_dir / "dist" / "it_errors.db"
-    if dist_db.exists():
-        return dist_db
-
-    # 4. Default: if dist exists, use it; otherwise root
-    if (app_dir / "dist").is_dir():
-        return dist_db
-    return root_db
+    return candidates[1] if (app_dir / "dist").is_dir() else candidates[0]
 
 
 def setup_logging(log_level: int = logging.INFO) -> None:
@@ -90,3 +73,4 @@ class AppSettings:
     # Set to False to open application directly without login barrier.
     # Set to True when ready to enforce authentication and user login screen.
     auth_enabled: bool = False
+

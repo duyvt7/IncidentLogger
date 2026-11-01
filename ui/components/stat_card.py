@@ -64,3 +64,4 @@ class StatCard(tk.Frame):
     def set_color(self, color: str) -> None:
         """Updates the accent text color of the value."""
         self._value_label.configure(fg=color)
+

@@ -66,3 +66,4 @@ def load_hmi_status(
                 "Remark": r["remark"] or "",
             }
         return result
+

@@ -207,19 +207,14 @@ class IncidentDialog(tk.Toplevel):
     def _on_category_changed(self, *_) -> None:
         """Updates the sub-category combobox when the selected category changes."""
         selected_cat = self.fields["category"].get()
-        subs = []
-        for cat_name, sub_list in DETAIL_STRUCTURE:
-            if cat_name == selected_cat:
-                subs = sub_list
-                break
+        subs = dict(DETAIL_STRUCTURE).get(selected_cat, [])
 
         sub_cb = self.fields["sub_category"]
-        if subs:
-            sub_cb.configure(values=subs, state="readonly")
-            sub_cb.set(subs[0])
-        else:
-            sub_cb.configure(values=[], state="disabled")
-            sub_cb.set("")
+        sub_cb.configure(
+            values=subs,
+            state="readonly" if subs else "disabled",
+        )
+        sub_cb.set(subs[0] if subs else "")
 
     def _load_incident_data(self, incident_id: int) -> None:
         """Loads existing incident data into form controls."""
@@ -293,3 +288,4 @@ class IncidentDialog(tk.Toplevel):
             self.destroy()
         except Exception as exc:
             messagebox.showerror("Lỗi lưu sự cố", f"Không thể lưu sự cố: {exc}", parent=self)
+

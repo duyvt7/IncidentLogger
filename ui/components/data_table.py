@@ -135,3 +135,4 @@ class DataTable(tk.Frame):
     def get_row_count(self) -> int:
         """Returns current row count."""
         return len(self.tree.get_children())
+
